@@ -1,5 +1,9 @@
 <?php
     include "bd.php";
+    session_start();
+    if ((array_key_exists("id",$_SESSION) AND $_SESSION['id']) OR (array_key_exists("keep-online",$_COOKIE) AND $_COOKIE['keep-online'])){
+        echo "<script>window.location='home.php';</script>";
+    }
     if (isset($_POST["submit"])) {
         //HABRIA QUE CONTROLAR LA ENTRADA
         $usu2 = mysqli_real_escape_string($enlace,$_POST["user"]);
@@ -11,6 +15,11 @@
         if ($resultado) {
             $fila = mysqli_fetch_array ($resultado);
             if (mysqli_num_rows($resultado)>0) {
+                $_SESSION['id'] = rand(0,500);
+                $_SESSION['user']= $usu;
+                if ($_POST['cookie']==='1'){
+                    setcookie("keep-online",$fila['hash'],time()+60*60*24*365);
+                }
                 echo "<script>window.location='home.php';</script>";
             }
             else {
@@ -29,7 +38,6 @@
     					<span class="login100-form-title p-b-53">
     						Inicie Sesión
     					</span>
-    					
     					<div class="p-t-31 p-b-9">
     						<span class="txt1">
     							Usuario
@@ -60,6 +68,8 @@
     							Entrar
     						</button>
     					</div>
+    					<br>
+    					<p style="text-align: center; font-size: 16px;">Recordar Usuario <input type="checkbox" name="cookie" value="1"></p>
     					<?php
     					    if ($errorcode==405) {
     					        echo "<p style='color: red; text-align: center'>No es un usuario registrado</p>";
