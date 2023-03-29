@@ -1,38 +1,48 @@
 <?php
     include "bd.php";
+    include "decrypt.php";
     session_start();
     if ((array_key_exists("id",$_SESSION) AND $_SESSION['id']) OR (array_key_exists("keep-online",$_COOKIE) AND $_COOKIE['keep-online'])){
         echo "<script>window.location='home.php';</script>";
     }
     if (isset($_POST["submit"])) {
-        //HABRIA QUE CONTROLAR LA ENTRADA
-        $usu2 = mysqli_real_escape_string($enlace,$_POST["user"]);
-        $pass2 = mysqli_real_escape_string($enlace,$_POST["passwd"]);
-        $usu = md5($usu2);
-        $pass = md5($pass2);
-        $query = sprintf("SELECT * FROM users WHERE username='%s' AND password='%s'",$usu,$pass);
-        $resultado = mysqli_query($enlace,$query);
-        if ($resultado) {
+        $user_plain = mysqli_real_escape_string($enlace,$_POST["user"]);
+        $data = $user_plain;
+        $user = cifrarMensaje($data, $key);
+        $query = sprintf("SELECT * FROM users WHERE username='%s'",$user);
+        $user_result = mysqli_query($enlace,$query);
+        if ($user_result) {
+            $pass_plain = mysqli_real_escape_string($enlace,$_POST["passwd"]);
+            $data = $pass_plain;
+            $pass = cifrarMensaje($data, $key);
+            $query = sprintf("SELECT username FROM users WHERE password='%s'",$pass);
+            $pass_result = mysqli_query($enlace, $query);
+            $get_username = mysqli_fetch_assoc($pass_result);
+            $query = sprintf("SELECT * FROM users WHERE username='%s' AND password='%s'",$user,$pass);
+            $resultado = mysqli_query($enlace,$query);
             $fila = mysqli_fetch_array ($resultado);
-            if (mysqli_num_rows($resultado)>0) {
+            if ($get_username['username'] === $user){
                 $_SESSION['id'] = rand(0,500);
-                $_SESSION['user']= $usu;
-                if ($_POST['cookie']==='1'){
+                $_SESSION['user'] = $user;
+                if ($_POST['cookie'] == "1"){
                     setcookie("keep-online",$fila['hash'],time()+60*60*24*365);
                 }
                 echo "<script>window.location='home.php';</script>";
             }
             else {
-                $errorcode = 405;
+                $errorcode = 1002;
                 mysqli_close($enlace);
             }
+        }
+        else {
+            $errorcode = 1001;
         }
     }
     include "header_login.php";
 ?>
 <form action="index.php" method="post">
     <div class="limiter">
-    		<div class="container-login100" style="background-image: url('images/bg-01.jpg');">
+    		<div class="container-login100" style="background-image: url('images/index_bg-01.jpg');">
     			<div class="wrap-login100 p-l-110 p-r-110 p-t-62 p-b-33">
     				<form class="login100-form validate-form flex-sb flex-w">
     					<span class="login100-form-title p-b-53">
@@ -53,7 +63,7 @@
     							Contraseña
     						</span>
     
-    						<a href="#" class="txt2 bo1 m-l-5">
+    						<a href="pass_forgot.php" class="txt2 bo1 m-l-5">
     							He olvidado mi contraseña
     						</a>
     					</div>
@@ -71,8 +81,11 @@
     					<br>
     					<p style="text-align: center; font-size: 16px;">Recordar Usuario <input type="checkbox" name="cookie" value="1"></p>
     					<?php
-    					    if ($errorcode==405) {
-    					        echo "<p style='color: red; text-align: center'>No es un usuario registrado</p>";
+    					    if ($errorcode === 1001) {
+    					        echo "<p style='color: red; text-align: center'>El usuario no es válido</p>";
+    					    }
+    					    if ($errorcode === 1002){
+    					        echo "<p style='color: red; text-align: center'>La contraseña no es válida</p>";
     					    }
     					?>
     					<div class="w-full text-center p-t-55">
@@ -80,7 +93,7 @@
     							¡Únase a Nosotros!
     						</span>
     
-    						<a href="sign-up.php" class="txt2 bo1">
+    						<a href="new_acc.php" class="txt2 bo1">
     							Crear Cuenta
     						</a>
     					</div>

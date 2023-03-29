@@ -1,3 +1,1 @@
-<?php
-    echo "HAS ENTRADO";
-?>
+<p>Hola, esto es el home</p>
