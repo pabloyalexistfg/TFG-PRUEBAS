@@ -2,7 +2,7 @@
     include "bd.php";
     include "decrypt.php";
     session_start();
-    if ((array_key_exists("id",$_SESSION) AND $_SESSION['id']) OR (array_key_exists("keep-online",$_COOKIE) AND $_COOKIE['keep-online'])){
+    if ((array_key_exists("id",$_SESSION) AND $_SESSION['id']) OR (array_key_exists("keep-online",$_COOKIE) AND $_COOKIE['keep-online']) OR (array_key_exists("user",$_SESSION))){
         echo "<script>window.location='home.php';</script>";
     }
     if (isset($_POST["submit"])) {
@@ -22,7 +22,7 @@
             $resultado = mysqli_query($enlace,$query);
             $fila = mysqli_fetch_array ($resultado);
             if ($get_username['username'] === $user){
-                $_SESSION['id'] = rand(0,500);
+                $_SESSION['id'] = "1";
                 $_SESSION['user'] = $user;
                 if ($_POST['cookie'] == "1"){
                     setcookie("keep-online",$fila['hash'],time()+60*60*24*365);
