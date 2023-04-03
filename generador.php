@@ -18,7 +18,7 @@
     }
     
     // Ejemplo de uso
-    $mensaje = "pablo";
+    $mensaje = "pablo@pablo.com";
     $clave = "lleva-la-tarara-un-vestido-blanco-lleno-de-cascabeles";
     $mensajeCifrado = cifrarMensaje($mensaje, $clave);
     echo "Mensaje cifrado: " . $mensajeCifrado . "<br>";

@@ -15,13 +15,10 @@
             $pass_plain = mysqli_real_escape_string($enlace,$_POST["passwd"]);
             $data = $pass_plain;
             $pass = cifrarMensaje($data, $key);
-            $query = sprintf("SELECT username FROM users WHERE password='%s'",$pass);
-            $pass_result = mysqli_query($enlace, $query);
-            $get_username = mysqli_fetch_assoc($pass_result);
             $query = sprintf("SELECT * FROM users WHERE username='%s' AND password='%s'",$user,$pass);
             $resultado = mysqli_query($enlace,$query);
             $fila = mysqli_fetch_array ($resultado);
-            if ($get_username['username'] === $user){
+            if ($fila['username'] === $user && $fila['password'] === $pass){
                 $_SESSION['id'] = "1";
                 $_SESSION['user'] = $user;
                 if ($_POST['cookie'] == "1"){
@@ -36,6 +33,7 @@
         }
         else {
             $errorcode = 1001;
+            mysqli_close($enlace);
         }
     }
     include "header_login.php";
